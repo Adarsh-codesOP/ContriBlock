@@ -1,0 +1,94 @@
+version: '3.8'
+
+services:
+  # Backend API service
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+      - redis
+      - ipfs
+      - blockchain
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/contriblock
+      - REDIS_URL=redis://redis:6379/0
+      - WEB3_RPC_URL=http://blockchain:8545
+      - CHAIN_ID=1337
+      - IPFS_API_URL=http://ipfs:5001
+      - JWT_SECRET=${JWT_SECRET}
+      - ADMIN_PRIVATE_KEY=${ADMIN_PRIVATE_KEY}
+      - TOKEN_ADDRESS=${TOKEN_ADDRESS}
+      - CONTROLLER_ADDRESS=${CONTROLLER_ADDRESS}
+      - CORS_ORIGINS=http://localhost:3000
+    volumes:
+      - ./backend:/app
+    restart: unless-stopped
+
+  # PostgreSQL database
+  postgres:
+    image: postgres:15-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=contriblock
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  # Redis for rate limiting and caching
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+
+  # IPFS node
+  ipfs:
+    image: ipfs/kubo:latest
+    ports:
+      - "4001:4001" # P2P swarm
+      - "5001:5001" # API
+      - "8080:8080" # Gateway
+    volumes:
+      - ipfs_data:/data/ipfs
+    restart: unless-stopped
+
+  # Local blockchain for development
+  blockchain:
+    image: trufflesuite/ganache:latest
+    ports:
+      - "8545:8545"
+    command: [
+      "--chain.networkId", "1337",
+      "--chain.chainId", "1337",
+      "--miner.blockTime", "5",
+      "--wallet.deterministic", "true",
+      "--wallet.totalAccounts", "10"
+    ]
+    restart: unless-stopped
+
+  # Smart contract deployment
+  contracts:
+    build: ./contracts
+    depends_on:
+      - blockchain
+    environment:
+      - WEB3_RPC_URL=http://blockchain:8545
+      - ADMIN_PRIVATE_KEY=${ADMIN_PRIVATE_KEY}
+    volumes:
+      - ./contracts:/app
+      - contracts_artifacts:/app/artifacts
+      - ./.env:/app/.env
+    command: ["/bin/bash", "-c", "python3 script/deploy.py && python3 script/update_env.py"]
+
+volumes:
+  postgres_data:
+  redis_data:
+  ipfs_data:
+  contracts_artifacts:
