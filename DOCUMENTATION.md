@@ -448,3 +448,19 @@ If the backend can't connect to IPFS, check the `IPFS_API_URL` in the `.env` fil
 ---
 
 For more information or support, please contact the ContriBlock team.
+
+
+
+
+
+to run the frontend 
+
+cd frontend; npm run dev
+
+to run the backend
+
+//cd backend; uvicorn main:app --host 0.0.0.0 --port 8000
+docker-compose up -d backend postgres redis ipfs blockchain 
+cd backend && python -m pip install -r requirements.txt 
+cd backend; python -m pip install -r requirements.txt 
+cd backend; python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload 
