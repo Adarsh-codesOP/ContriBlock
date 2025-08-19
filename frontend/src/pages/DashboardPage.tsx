@@ -55,16 +55,18 @@ const DashboardPage = () => {
       try {
         // Fetch user's contributions
         const contributionsResponse = await api.contributions.getUserContributions();
+        console.log('Contributions response:', contributionsResponse);
         setContributions(contributionsResponse.slice(0, 5)); // Get latest 5
         
         // Fetch user's impact records
         const impactsResponse = await api.impact.getUserImpact();
+        console.log('Impacts response:', impactsResponse);
         setImpacts(impactsResponse.slice(0, 5)); // Get latest 5
         
         // Calculate stats
         const allContributions = contributionsResponse;
         const verifiedCount = allContributions.filter(
-          (c: Contribution) => c.status === ContributionStatus.VERIFIED
+          (c: Contribution) => c.status === ContributionStatus.APPROVED
         ).length;
         const pendingCount = allContributions.filter(
           (c: Contribution) => c.status === ContributionStatus.PENDING
@@ -72,7 +74,7 @@ const DashboardPage = () => {
         
         // Calculate total impact (this would depend on your impact metrics)
         const totalImpactValue = impactsResponse.reduce(
-          (sum: number, impact: Impact) => sum + impact.value,
+          (sum: number, impact: Impact) => sum + (impact.value || 0),
           0
         );
         
@@ -96,7 +98,7 @@ const DashboardPage = () => {
 
   const getStatusIcon = (status: ContributionStatus) => {
     switch (status) {
-      case ContributionStatus.VERIFIED:
+      case ContributionStatus.APPROVED:
         return <CheckCircleIcon sx={{ color: theme.palette.success.main }} />;
       case ContributionStatus.PENDING:
         return <PendingIcon sx={{ color: theme.palette.warning.main }} />;
@@ -109,10 +111,10 @@ const DashboardPage = () => {
 
   const getStatusChip = (status: ContributionStatus) => {
     switch (status) {
-      case ContributionStatus.VERIFIED:
+      case ContributionStatus.APPROVED:
         return (
           <Chip 
-            label="Verified" 
+            label="Approved" 
             size="small" 
             icon={<CheckCircleIcon />} 
             color="success" 

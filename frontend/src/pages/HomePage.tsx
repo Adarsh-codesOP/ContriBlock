@@ -28,16 +28,38 @@ import { useAuth } from '../contexts/AuthContext';
 const HomePage = () => {
   const theme = useTheme();
   const navigate = useNavigate();
-  const { user, connectWallet } = useAuth();
+  const { user, login } = useAuth();
   const [isConnecting, setIsConnecting] = useState(false);
 
   const handleConnect = async () => {
     setIsConnecting(true);
     try {
-      await connectWallet();
+      // Log MetaMask detection information
+      console.log('MetaMask detection:', {
+        hasEthereum: !!window.ethereum,
+        isMetaMask: window.ethereum?.isMetaMask,
+        selectedAddress: window.ethereum?.selectedAddress,
+        chainId: window.ethereum?.chainId,
+        isConnected: window.ethereum?.isConnected?.() || false
+      });
+      
+      // Check if window.ethereum exists before calling login
+      if (typeof window.ethereum === 'undefined') {
+        console.error('MetaMask not detected: window.ethereum is undefined');
+        // We'll continue to login which will handle the demo mode option
+      }
+      
+      await login();
       navigate('/dashboard');
     } catch (error) {
-      console.error('Failed to connect wallet:', error);
+      console.error('Connection error:', error);
+      // Check if the error is about MetaMask not being installed
+      if (error instanceof Error && error.message === 'MetaMask is not installed') {
+        // Already handled in the try block
+      } else if (error instanceof Error) {
+        // Show other errors
+        alert(`Wallet connection error: ${error.message}`);
+      }
     } finally {
       setIsConnecting(false);
     }
@@ -134,23 +156,53 @@ const HomePage = () => {
                     Go to Dashboard
                   </Button>
                 ) : (
-                  <Button
-                    variant="contained"
-                    size="large"
-                    onClick={handleConnect}
-                    disabled={isConnecting}
-                    sx={{ 
-                      px: 4, 
-                      py: 1.5,
-                      borderRadius: 2,
-                      textTransform: 'none',
-                      fontSize: '1rem',
-                      fontWeight: 600,
-                      boxShadow: '0 4px 14px 0 rgba(0,118,255,0.39)',
-                    }}
-                  >
-                    {isConnecting ? 'Connecting...' : 'Connect Wallet'}
-                  </Button>
+                  <>
+                    <Button
+                      variant="contained"
+                      size="large"
+                      onClick={handleConnect}
+                      disabled={isConnecting}
+                      sx={{ 
+                        px: 4, 
+                        py: 1.5,
+                        borderRadius: 2,
+                        textTransform: 'none',
+                        fontSize: '1rem',
+                        fontWeight: 600,
+                        boxShadow: '0 4px 14px 0 rgba(0,118,255,0.39)',
+                      }}
+                    >
+                      {isConnecting ? 'Connecting...' : 'Connect Wallet'}
+                    </Button>
+                    <Typography 
+                      variant="body2" 
+                      sx={{ 
+                        position: 'absolute',
+                        bottom: -30,
+                        left: '50%',
+                        transform: 'translateX(-50%)',
+                        color: 'white',
+                        fontSize: '0.8rem',
+                        width: '100%',
+                        textAlign: 'center',
+                      }}
+                    >
+                      Don't have MetaMask?{' '}
+                      <Typography
+                        component="span"
+                        variant="body2"
+                        sx={{ 
+                          cursor: 'pointer', 
+                          fontWeight: 500,
+                          color: theme.palette.secondary.main,
+                          '&:hover': { textDecoration: 'underline' }
+                        }}
+                        onClick={() => window.open('https://metamask.io/download/', '_blank')}
+                      >
+                        Install it here
+                      </Typography>
+                    </Typography>
+                  </>
                 )}
                 <Button
                   variant="outlined"

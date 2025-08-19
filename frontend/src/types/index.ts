@@ -8,6 +8,7 @@ export interface User {
   email: string | null;
   reputation: number;
   createdAt: string; // Changed from created_at
+  tokenBalance: number;
 }
 
 export enum UserRole {
