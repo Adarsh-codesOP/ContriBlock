@@ -1,0 +1,18 @@
+{
+  "name": "contriblock-contracts",
+  "version": "1.0.0",
+  "description": "Smart contracts for ContriBlock platform",
+  "main": "index.js",
+  "scripts": {
+    "compile": "hardhat compile",
+    "test": "hardhat test",
+    "deploy": "python3 script/deploy.py"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^4.9.3"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^3.0.0",
+    "hardhat": "^2.17.0"
+  }
+}
