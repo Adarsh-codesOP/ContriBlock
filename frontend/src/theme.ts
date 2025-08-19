@@ -18,6 +18,16 @@ declare module '@mui/material/styles' {
   }
 }
 
+// Add this new declaration
+declare module '@mui/material/styles/createTypography' {
+  interface TypographyOptions {
+    button?: {
+      fontWeight?: number;
+      textTransform?: 'none' | 'capitalize' | 'uppercase' | 'lowercase';
+    };
+  }
+}
+
 const getDesignTokens = (mode: PaletteMode) => ({
   palette: {
     mode,

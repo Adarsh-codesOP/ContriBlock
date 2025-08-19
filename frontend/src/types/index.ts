@@ -3,11 +3,11 @@ export interface User {
   id: number;
   wallet: string;
   role: UserRole;
-  kyc_status: KycStatus;
+  kycStatus: KycStatus; // Changed from kyc_status
   name: string | null;
   email: string | null;
   reputation: number;
-  created_at: string;
+  createdAt: string; // Changed from created_at
 }
 
 export enum UserRole {
@@ -36,15 +36,15 @@ export interface Contribution {
   title: string;
   description: string;
   status: ContributionStatus;
-  user_id: number;
+  userId: number; // Changed from user_id
   user: User;
-  sector_id: number;
+  sectorId: number; // Changed from sector_id
   sector: Sector;
-  evidence_url: string;
+  evidenceUrl: string; // Changed from evidence_url
   feedback: string | null;
-  blockchain_tx: string | null;
-  created_at: string;
-  updated_at: string;
+  blockchainTx: string | null; // Changed from blockchain_tx
+  createdAt: string; // Changed from created_at
+  updatedAt: string; // Changed from updated_at
 }
 
 export enum ContributionStatus {
@@ -59,14 +59,16 @@ export interface Impact {
   title: string;
   description: string;
   metrics: string;
-  is_verified: boolean;
-  contribution_id: number;
+  isVerified: boolean; // Changed from is_verified
+  contributionId: number; // Changed from contribution_id
   contribution: Contribution;
-  evidence_url: string;
+  evidenceUrl: string; // Changed from evidence_url
   feedback: string | null;
-  blockchain_tx: string | null;
-  created_at: string;
-  updated_at: string;
+  blockchainTx: string | null; // Changed from blockchain_tx
+  createdAt: string; // Changed from created_at
+  updatedAt: string; // Changed from updated_at
+  value: number; // Add this missing property
+  tokensAwarded: number; // Add this missing property
 }
 
 // Marketplace types
@@ -75,28 +77,35 @@ export interface MarketplaceItem {
   name: string;
   description: string;
   price: number;
-  image_url: string | null;
+  imageUrl: string | null; // Changed from image_url
   active: boolean;
-  created_at: string;
-  updated_at: string;
+  createdAt: string; // Changed from created_at
+  updatedAt: string; // Changed from updated_at
+  quantity: number; // Add this missing property
 }
 
+// Purchase types
 export interface Purchase {
   id: number;
-  user_id: number;
+  userId: number; // Changed from user_id
   user: User;
-  item_id: number;
+  itemId: number; // Changed from item_id
   item: MarketplaceItem;
-  blockchain_tx: string;
-  created_at: string;
+  blockchainTx: string; // Changed from blockchain_tx
+  createdAt: string; // Changed from created_at
+  purchaseDate: string; // Add this missing property
+  price: number; // Add this missing property
+  redeemCode: string | null; // Add this missing property
 }
 
 // Form types
 export interface ContributionFormData {
   title: string;
   description: string;
-  sector_id: number;
-  evidence_file?: File;
+  sectorId: number; // Changed from sector_id
+  evidenceFile?: File;
+  evidenceUrl?: string; // Add this missing property
+  imageUrl?: string; // Add this missing property
 }
 
 export interface ImpactFormData {
@@ -107,10 +116,11 @@ export interface ImpactFormData {
   evidence_file?: File;
 }
 
+// Add if not already present
 export interface MarketplaceItemFormData {
   name: string;
   description: string;
   price: number;
-  image_url?: string;
-  active: boolean;
+  imageUrl?: string;
+  quantity: number;
 }
