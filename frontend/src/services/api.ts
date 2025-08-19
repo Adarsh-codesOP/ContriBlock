@@ -203,6 +203,8 @@ export const verificationApi = {
 export const impactApi = {
   getAllImpacts: (params?: { contribution_id?: number }) =>
     apiClient.get<Impact[]>('/api/v1/impact', { params }),
+  getUserImpact: () =>
+    apiClient.get<Impact[]>('/api/v1/impact/me'),
   createImpact: (data: FormData) =>
     apiClient.post<Impact>('/api/v1/impact', data, {
       headers: {
@@ -237,3 +239,14 @@ export const marketplaceApi = {
 
 // Export the API client for direct use when needed
 export { apiClient };
+
+// Export a combined api object for backward compatibility
+export const api = {
+  auth: authApi,
+  users: usersApi,
+  sectors: sectorsApi,
+  contributions: contributionsApi,
+  verification: verificationApi,
+  impact: impactApi,
+  marketplace: marketplaceApi
+};

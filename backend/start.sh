@@ -5,9 +5,9 @@ set -e
 echo "Waiting for PostgreSQL to be ready..."
 sleep 5
 
-# Run database migrations
+# Run database migrations (but don't fail if they error)
 echo "Running database migrations..."
-alembic upgrade head
+alembic upgrade head || echo "Migration failed, but continuing startup"
 
 # Start the FastAPI application
 echo "Starting FastAPI application..."

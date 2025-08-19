@@ -24,7 +24,7 @@ const LoginPage = () => {
   const theme = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, connectWallet, isLoading } = useAuth();
+  const { user, login, isLoading } = useAuth();
   const [error, setError] = useState<string | null>(null);
   const [isConnecting, setIsConnecting] = useState(false);
 
@@ -43,7 +43,7 @@ const LoginPage = () => {
     setIsConnecting(true);
     
     try {
-      await connectWallet();
+      await login();
       // The useEffect above will handle the redirect once user is set
     } catch (err) {
       console.error('Login error:', err);

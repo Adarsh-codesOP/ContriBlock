@@ -33,7 +33,7 @@ class Contribution(Base):
     # Relationships
     user = relationship("User", back_populates="contributions")
     sector = relationship("Sector", back_populates="contributions")
-    metadata = relationship("ContributionMetadata", back_populates="contribution", uselist=False)
+    contribution_metadata = relationship("ContributionMetadata", back_populates="contribution", uselist=False)
     impact_records = relationship("ImpactRecord", back_populates="contribution")
     token_distributions = relationship("TokenDistribution", back_populates="contribution")
     marketplace_item = relationship("MarketplaceItem", back_populates="contribution", uselist=False)
@@ -46,4 +46,4 @@ class ContributionMetadata(Base):
     data = Column(JSON, nullable=False)  # JSONB data according to sector schema
 
     # Relationships
-    contribution = relationship("Contribution", back_populates="metadata")
+    contribution = relationship("Contribution", back_populates="contribution_metadata")

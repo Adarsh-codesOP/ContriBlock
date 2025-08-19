@@ -53,6 +53,25 @@ class Contribution(ContributionInDB):
     metadata: Optional[Dict[str, Any]] = None
 
 
+# Schema for contribution with metadata
+class ContributionWithMetadata(BaseModel):
+    id: int
+    user_id: int
+    sector_id: int
+    title: str
+    abstract: str
+    ipfs_cid: str
+    url: Optional[str] = None
+    premium: bool = False
+    status: ContributionStatus
+    token_minted: bool
+    created_at: datetime
+    metadata: Optional[ContributionMetadataBase] = None
+
+    class Config:
+        from_attributes = True
+
+
 # Schema for contribution verification
 class ContributionVerify(BaseModel):
     approved: bool

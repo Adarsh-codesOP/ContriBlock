@@ -11,7 +11,7 @@ from app.db.schemas import (
     ContributionCreate,
     ContributionUpdate,
     ContributionWithMetadata,
-    ContributionMetadata as ContributionMetadataSchema,
+    ContributionMetadataBase as ContributionMetadataSchema,
 )
 from app.services.ipfs import ipfs_client
 

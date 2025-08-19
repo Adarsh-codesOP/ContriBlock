@@ -6,10 +6,10 @@ from app.db.schemas.sectors import (
 )
 from app.db.schemas.contributions import (
     Contribution, ContributionCreate, ContributionUpdate, ContributionInDB,
-    ContributionMetadataBase, ContributionVerify
+    ContributionMetadataBase, ContributionVerify, ContributionWithMetadata
 )
 from app.db.schemas.impact import (
-    ImpactRecord, ImpactRecordCreate, ImpactRecordInDB,
+    ImpactRecord, ImpactRecordCreate, ImpactRecordUpdate, ImpactRecordInDB,
     TokenDistribution, TokenDistributionCreate, TokenDistributionInDB,
     ImpactAttestation, ImpactDistribution
 )

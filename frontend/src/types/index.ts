@@ -27,7 +27,7 @@ export interface Sector {
   id: number;
   name: string;
   description: string;
-  created_at: string;
+  createdAt: string; // Changed from created_at
 }
 
 // Contribution types
@@ -59,16 +59,16 @@ export interface Impact {
   title: string;
   description: string;
   metrics: string;
-  isVerified: boolean; // Changed from is_verified
-  contributionId: number; // Changed from contribution_id
+  isVerified: boolean;
+  contributionId: number;
   contribution: Contribution;
-  evidenceUrl: string; // Changed from evidence_url
+  evidenceUrl: string;
   feedback: string | null;
-  blockchainTx: string | null; // Changed from blockchain_tx
-  createdAt: string; // Changed from created_at
-  updatedAt: string; // Changed from updated_at
-  value: number; // Add this missing property
-  tokensAwarded: number; // Add this missing property
+  blockchainTx: string | null;
+  createdAt: string;
+  updatedAt: string;
+  value: number;
+  tokensAwarded: number;
 }
 
 // Marketplace types
@@ -102,25 +102,29 @@ export interface Purchase {
 export interface ContributionFormData {
   title: string;
   description: string;
-  sectorId: number; // Changed from sector_id
+  sectorId: number;
   evidenceFile?: File;
-  evidenceUrl?: string; // Add this missing property
-  imageUrl?: string; // Add this missing property
+  evidenceUrl?: string;
+  imageUrl?: string;
 }
 
 export interface ImpactFormData {
   title: string;
   description: string;
   metrics: string;
-  contribution_id: number;
-  evidence_file?: File;
+  contributionId: number; // Changed from contribution_id
+  evidenceFile?: File; // Changed from evidence_file
 }
 
-// Add if not already present
+// Marketplace item form data
 export interface MarketplaceItemFormData {
   name: string;
   description: string;
   price: number;
   imageUrl?: string;
   quantity: number;
+  active?: boolean;
+  imageFile?: File;
+  category?: string;
+  expirationDate?: string;
 }

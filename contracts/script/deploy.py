@@ -28,10 +28,37 @@ print(f"Deploying from account: {account.address}")
 
 # Load contract ABIs and bytecode
 def load_contract(contract_name):
-    artifacts_dir = Path("../artifacts/contracts")
-    with open(artifacts_dir / f"{contract_name}.sol" / f"{contract_name}.json") as f:
-        contract_json = json.load(f)
-    return contract_json["abi"], contract_json["bytecode"]
+    # Try different possible paths for artifacts
+    possible_paths = [
+        Path("../artifacts/src"),
+        Path("../artifacts/contracts"),
+        Path("./artifacts/src"),
+        Path("./artifacts/contracts"),
+        Path("/app/artifacts/src"),
+        Path("/app/artifacts/contracts")
+    ]
+    
+    for artifacts_dir in possible_paths:
+        try:
+            file_path = artifacts_dir / f"{contract_name}.sol" / f"{contract_name}.json"
+            print(f"Trying path: {file_path}")
+            with open(file_path) as f:
+                contract_json = json.load(f)
+            return contract_json["abi"], contract_json["bytecode"]
+        except FileNotFoundError:
+            continue
+    
+    # If we get here, we couldn't find the file
+    print(f"Could not find contract artifacts for {contract_name}")
+    # List available files in artifacts directory
+    print("Available directories:")
+    for path in [Path("."), Path("../artifacts"), Path("/app/artifacts")]:
+        if path.exists():
+            print(f"Contents of {path}:")
+            for item in path.glob("**/*"):
+                print(f"  {item}")
+    
+    raise FileNotFoundError(f"Could not find contract artifacts for {contract_name}")
 
 # Deploy ContriToken
 def deploy_token():

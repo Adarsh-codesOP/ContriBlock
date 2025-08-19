@@ -10,20 +10,20 @@ services:
       - postgres
       - redis
       - ipfs
-      - blockchain
     environment:
       - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/contriblock
       - REDIS_URL=redis://redis:6379/0
-      - WEB3_RPC_URL=http://blockchain:8545
+      - WEB3_RPC_URL=http://localhost:8545
       - CHAIN_ID=1337
       - IPFS_API_URL=http://ipfs:5001
-      - JWT_SECRET=${JWT_SECRET}
-      - ADMIN_PRIVATE_KEY=${ADMIN_PRIVATE_KEY}
-      - TOKEN_ADDRESS=${TOKEN_ADDRESS}
-      - CONTROLLER_ADDRESS=${CONTROLLER_ADDRESS}
-      - CORS_ORIGINS=http://localhost:3000
+      - JWT_SECRET=contriblock_secure_jwt_secret_key_2025
+      - ADMIN_PRIVATE_KEY=0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
+      - TOKEN_ADDRESS=0x0000000000000000000000000000000000000000
+      - CONTROLLER_ADDRESS=0x0000000000000000000000000000000000000000
+      - CORS_ORIGINS=http://localhost:5173
     volumes:
       - ./backend:/app
+      - ./.env:/app/.env
     restart: unless-stopped
 
   # PostgreSQL database
@@ -80,12 +80,12 @@ services:
       - blockchain
     environment:
       - WEB3_RPC_URL=http://blockchain:8545
-      - ADMIN_PRIVATE_KEY=${ADMIN_PRIVATE_KEY}
+      - ADMIN_PRIVATE_KEY=0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
     volumes:
       - ./contracts:/app
       - contracts_artifacts:/app/artifacts
       - ./.env:/app/.env
-    command: ["/bin/bash", "-c", "python3 script/deploy.py && python3 script/update_env.py"]
+    command: ["/bin/bash", "-c", "sleep 10 && python3 script/deploy.py && python3 script/update_env.py"]
 
 volumes:
   postgres_data:

@@ -55,14 +55,14 @@ const DashboardPage = () => {
       try {
         // Fetch user's contributions
         const contributionsResponse = await api.contributions.getUserContributions();
-        setContributions(contributionsResponse.data.slice(0, 5)); // Get latest 5
+        setContributions(contributionsResponse.slice(0, 5)); // Get latest 5
         
         // Fetch user's impact records
         const impactsResponse = await api.impact.getUserImpact();
-        setImpacts(impactsResponse.data.slice(0, 5)); // Get latest 5
+        setImpacts(impactsResponse.slice(0, 5)); // Get latest 5
         
         // Calculate stats
-        const allContributions = contributionsResponse.data;
+        const allContributions = contributionsResponse;
         const verifiedCount = allContributions.filter(
           (c: Contribution) => c.status === ContributionStatus.VERIFIED
         ).length;
@@ -71,7 +71,7 @@ const DashboardPage = () => {
         ).length;
         
         // Calculate total impact (this would depend on your impact metrics)
-        const totalImpactValue = impactsResponse.data.reduce(
+        const totalImpactValue = impactsResponse.reduce(
           (sum: number, impact: Impact) => sum + impact.value,
           0
         );

@@ -177,9 +177,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
-// Add Ethereum window type
+// Add Ethereum window type with proper typing
 declare global {
   interface Window {
-    ethereum?: any;
+    ethereum?: {
+      isMetaMask?: boolean;
+      request: (request: { method: string; params?: any[] }) => Promise<any>;
+      on: (event: string, callback: (...args: any[]) => void) => void;
+      removeListener: (event: string, callback: (...args: any[]) => void) => void;
+      selectedAddress?: string;
+      chainId?: string;
+    };
   }
 }

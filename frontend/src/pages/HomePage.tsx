@@ -16,7 +16,7 @@ import {
 } from '@mui/material';
 import {
   Verified as VerifiedIcon,
-  Eco as EcoIcon,
+  Nature as EcoIcon, // Using Nature icon instead of Eco
   Token as TokenIcon,
   Security as SecurityIcon,
   Speed as SpeedIcon,

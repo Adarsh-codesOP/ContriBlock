@@ -31,6 +31,15 @@ class ImpactRecord(ImpactRecordInDB):
     pass
 
 
+# Schema for updating an impact record
+class ImpactRecordUpdate(BaseModel):
+    metric_type: Optional[str] = None
+    value: Optional[float] = None
+    weight: Optional[float] = None
+    score: Optional[float] = None
+    signature: Optional[str] = None
+
+
 # Base TokenDistribution schema
 class TokenDistributionBase(BaseModel):
     contribution_id: int

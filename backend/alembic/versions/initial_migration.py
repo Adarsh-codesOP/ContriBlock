@@ -17,12 +17,28 @@ depends_on = None
 
 
 def upgrade() -> None:
-    # Create enum types
-    op.execute("CREATE TYPE user_role AS ENUM ('user', 'verifier', 'admin')")
-    op.execute("CREATE TYPE kyc_status AS ENUM ('none', 'pending', 'approved', 'rejected')")
-    op.execute("CREATE TYPE contribution_status AS ENUM ('draft', 'submitted', 'under_review', 'approved', 'rejected')")
-    op.execute("CREATE TYPE transaction_type AS ENUM ('mint', 'impact', 'purchase', 'other')")
-    op.execute("CREATE TYPE transaction_status AS ENUM ('pending', 'confirmed', 'failed')")
+    # Create enum types with IF NOT EXISTS check
+    op.execute("""
+    DO $$
+    BEGIN
+        IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'user_role') THEN
+            CREATE TYPE user_role AS ENUM ('user', 'verifier', 'admin');
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'kyc_status') THEN
+            CREATE TYPE kyc_status AS ENUM ('none', 'pending', 'approved', 'rejected');
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'contribution_status') THEN
+            CREATE TYPE contribution_status AS ENUM ('draft', 'submitted', 'under_review', 'approved', 'rejected');
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'transaction_type') THEN
+            CREATE TYPE transaction_type AS ENUM ('mint', 'impact', 'purchase', 'other');
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'transaction_status') THEN
+            CREATE TYPE transaction_status AS ENUM ('pending', 'confirmed', 'failed');
+        END IF;
+    END
+    $$;
+    """)    
     
     # Create users table
     op.create_table(

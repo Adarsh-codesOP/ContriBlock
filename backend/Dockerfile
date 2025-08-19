@@ -22,4 +22,4 @@ ENV PYTHONUNBUFFERED=1
 EXPOSE 8000
 
 # Command to run the application
-CMD ["/app/start.sh"]
+CMD ["bash", "/app/start.sh"]
