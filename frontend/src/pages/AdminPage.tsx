@@ -95,9 +95,8 @@ const AdminPage = () => {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch('/api/v1/users');
-      const data = await response.json();
-      setUsers(data);
+      const data = await api.users.getAllUsers();
+      setUsers(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error('Error fetching users:', err);
       setError('Failed to load users. Please try again.');

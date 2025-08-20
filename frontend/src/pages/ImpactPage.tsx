@@ -148,11 +148,19 @@ const ImpactPage = () => {
     setIsLoading(true);
     try {
       const response = await api.impact.getUserImpacts(page + 1, rowsPerPage);
-      setUserImpacts(response.data.impacts);
-      setTotalImpacts(response.data.total);
+      if (response && response.impacts) {
+        setUserImpacts(response.impacts);
+        setTotalImpacts(response.total);
+      } else {
+        // Handle case where response doesn't have expected structure
+        setUserImpacts([]);
+        setTotalImpacts(0);
+      }
     } catch (err) {
       console.error('Error fetching user impacts:', err);
       setError('Failed to load impact records. Please try again.');
+      setUserImpacts([]);
+      setTotalImpacts(0);
     } finally {
       setIsLoading(false);
     }

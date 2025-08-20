@@ -73,10 +73,11 @@ const NewContributionPage = () => {
   const fetchSectors = async () => {
     try {
       const response = await api.sectors.getAllSectors();
-      setSectors(response.data);
+      setSectors(response || []);
     } catch (err) {
       console.error('Error fetching sectors:', err);
       setError('Failed to load sectors. Please try again.');
+      setSectors([]);
     } finally {
       setIsLoading(false);
     }
@@ -148,7 +149,11 @@ const NewContributionPage = () => {
 
     try {
       const response = await api.contributions.createContribution(formData);
-      navigate(`/contributions/${response.data.id}`);
+      if (response && response.data && response.data.id) {
+        navigate(`/contributions/${response.data.id}`);
+      } else {
+        throw new Error('Invalid response from server');
+      }
     } catch (err) {
       console.error('Error submitting contribution:', err);
       setError('Failed to submit contribution. Please try again.');

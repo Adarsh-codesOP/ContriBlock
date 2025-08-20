@@ -382,6 +382,8 @@ export const impactApi = {
     mockApiClient.get<Impact[]>('/api/v1/impact'),
   getUserImpact: () =>
     mockApiClient.get<Impact[]>('/api/v1/impact/me'),
+  getUserImpacts: (page?: number, limit?: number) =>
+    mockApiClient.get<{impacts: Impact[], total: number}>(`/api/v1/impact/me?page=${page || 1}&limit=${limit || 10}`),
   createImpact: (data: FormData) =>
     mockApiClient.post<Impact>('/api/v1/impact', data),
   getImpactById: (id: number) => 
@@ -394,6 +396,8 @@ export const impactApi = {
 export const marketplaceApi = {
   getAllItems: (params?: { active?: boolean }) =>
     mockApiClient.get<MarketplaceItem[]>('/api/v1/marketplace'),
+  getMarketplaceItems: (page?: number, limit?: number, sortBy?: string, filterByPrice?: string, searchQuery?: string) =>
+    mockApiClient.get<{items: MarketplaceItem[], total: number}>(`/api/v1/marketplace?page=${page || 1}&limit=${limit || 10}&sort=${sortBy || 'newest'}&price=${filterByPrice || 'all'}&search=${searchQuery || ''}`),
   createItem: (data: { name: string; description: string; price: number; image_url?: string; active?: boolean }) =>
     mockApiClient.post<MarketplaceItem>('/api/v1/marketplace', data),
   getItemById: (id: number) => 

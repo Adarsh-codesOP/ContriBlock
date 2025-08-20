@@ -465,3 +465,28 @@ cd backend && python -m pip install -r requirements.txt
 cd backend; python -m pip install -r requirements.txt 
 cd backend; python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload 
 
+ContriToken
+    Deployment
+      ✔ Should set the right owner
+      ✔ Should assign the total supply of tokens to the owner
+
+  Controller
+Starting Controller tests...
+Owner address: 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
+Deploying ContriToken...
+ContriToken deployed to: 0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0
+Deploying Controller...
+Using token address: 0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0
+Controller deployed to: 0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9      
+Setting controller in token contract...
+Controller set in token contract
+    Deployment
+Contract owner: 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
+Expected owner: 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
+      ✔ Should set the right owner
+Contract token address: 0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0      
+Expected token address: 0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0      
+      ✔ Should set the correct token address
+
+
+  

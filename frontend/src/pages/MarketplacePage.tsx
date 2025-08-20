@@ -115,11 +115,19 @@ const MarketplacePage = () => {
     try {
       // In a real implementation, these parameters would be passed to the API
       const response = await api.marketplace.getMarketplaceItems(page, itemsPerPage, sortBy, filterByPrice, searchQuery);
-      setMarketplaceItems(response.data.items);
-      setTotalPages(Math.ceil(response.data.total / itemsPerPage));
+      if (response && response.items) {
+        setMarketplaceItems(response.items);
+        setTotalPages(Math.ceil(response.total / itemsPerPage));
+      } else {
+        // Handle case where response doesn't have expected structure
+        setMarketplaceItems([]);
+        setTotalPages(1);
+      }
     } catch (err) {
       console.error('Error fetching marketplace items:', err);
       setError('Failed to load marketplace items. Please try again.');
+      setMarketplaceItems([]);
+      setTotalPages(1);
     } finally {
       setIsLoading(false);
     }
