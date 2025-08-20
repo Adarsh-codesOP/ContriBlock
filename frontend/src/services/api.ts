@@ -315,25 +315,25 @@ const mockApiClient = new MockApiClient();
 // Auth API with proper typing
 export const authApi = {
   getNonce: (wallet: string) => 
-    mockApiClient.post<{ nonce: string }>('/api/v1/auth/nonce', { wallet }),
+    apiClient.post<{ nonce: string }>('/api/v1/auth/nonce', { wallet }),
   verifySignature: (data: { wallet: string; message: string; signature: string }) =>
-    mockApiClient.post<{ access_token: string } & User>('/api/v1/auth/verify', data),
+    apiClient.post<{ access_token: string } & User>('/api/v1/auth/verify', data),
 };
 
 // Users API with proper typing
 export const usersApi = {
   getCurrentUser: () => 
-    mockApiClient.get<User>('/api/v1/users/me'),
+    apiClient.get<User>('/api/v1/users/me'),
   updateCurrentUser: (data: { name?: string; email?: string }) =>
-    mockApiClient.put<User>('/api/v1/users/me', data),
+    apiClient.put<User>('/api/v1/users/me', data),
   getAllUsers: () => 
-    mockApiClient.get<User[]>('/api/v1/users'),
+    apiClient.get<User[]>('/api/v1/users'),
   getUserById: (id: number) => 
-    mockApiClient.get<User>(`/api/v1/users/${id}`),
+    apiClient.get<User>(`/api/v1/users/${id}`),
   updateUserRole: (id: number, role: string) =>
-    mockApiClient.put<User>(`/api/v1/users/${id}/role`, { role }),
+    apiClient.put<User>(`/api/v1/users/${id}/role`, { role }),
   updateUserKyc: (id: number, kycStatus: string) =>
-    mockApiClient.put<User>(`/api/v1/users/${id}/kyc`, { kyc_status: kycStatus }),
+    apiClient.put<User>(`/api/v1/users/${id}/kyc`, { kyc_status: kycStatus }),
 };
 
 // Sectors API with proper typing

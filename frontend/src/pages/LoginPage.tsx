@@ -13,6 +13,7 @@ import {
 } from '@mui/material';
 import { AccountBalanceWallet as WalletIcon } from '@mui/icons-material';
 import { useAuth } from '../contexts/AuthContext';
+import MetaMaskPrompt from '../components/wallet/MetaMaskPrompt';
 
 interface LocationState {
   from?: {
@@ -24,7 +25,7 @@ const LoginPage = () => {
   const theme = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, login, isLoading } = useAuth();
+  const { user, login, isLoading, error: authError } = useAuth();
   const [error, setError] = useState<string | null>(null);
   const [isConnecting, setIsConnecting] = useState(false);
 
@@ -52,6 +53,10 @@ const LoginPage = () => {
       setIsConnecting(false);
     }
   };
+  
+  // Check if MetaMask is not installed based on error from AuthContext
+  const isMetaMaskNotInstalled = authError === 'metamask_not_installed';
+  const isNotMetaMask = authError === 'not_metamask';
 
   if (isLoading) {
     return (
@@ -81,88 +86,109 @@ const LoginPage = () => {
       }}
     >
       <Container maxWidth="sm">
-        <Paper
-          elevation={6}
-          sx={{
-            p: 4,
-            borderRadius: 3,
-            backdropFilter: 'blur(10px)',
-            background: 'rgba(255, 255, 255, 0.9)',
-          }}
-        >
-          <Box textAlign="center" mb={4}>
-            <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 700 }}>
-              Welcome to ContriBlock
-            </Typography>
-            <Typography variant="body1" color="text.secondary">
-              Connect your wallet to access the platform
-            </Typography>
-          </Box>
-
-          {error && (
-            <Alert severity="error" sx={{ mb: 3 }}>
-              {error}
+        {isMetaMaskNotInstalled ? (
+          <MetaMaskPrompt />
+        ) : isNotMetaMask ? (
+          <Paper
+            elevation={6}
+            sx={{
+              p: 4,
+              borderRadius: 3,
+              backdropFilter: 'blur(10px)',
+              background: 'rgba(255, 255, 255, 0.9)',
+            }}
+          >
+            <Alert severity="warning" sx={{ mb: 3 }}>
+              Please use MetaMask as your wallet provider. Other wallets may not be fully compatible with our platform.
             </Alert>
-          )}
+            <MetaMaskPrompt />
+          </Paper>
+        ) : (
+          <Paper
+            elevation={6}
+            sx={{
+              p: 4,
+              borderRadius: 3,
+              backdropFilter: 'blur(10px)',
+              background: 'rgba(255, 255, 255, 0.9)',
+            }}
+          >
+            <Box textAlign="center" mb={4}>
+              <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 700 }}>
+                Welcome to ContriBlock
+              </Typography>
+              <Typography variant="body1" color="text.secondary">
+                Connect your wallet to access the platform
+              </Typography>
+            </Box>
 
-          <Stack spacing={3}>
-            <Button
-              variant="contained"
-              size="large"
-              fullWidth
-              startIcon={<WalletIcon />}
-              onClick={handleConnect}
-              disabled={isConnecting}
-              sx={{
-                py: 1.5,
-                borderRadius: 2,
-                textTransform: 'none',
-                fontSize: '1rem',
-                fontWeight: 600,
-              }}
-            >
-              {isConnecting ? 'Connecting...' : 'Connect with MetaMask'}
-            </Button>
+            {error && error !== 'metamask_not_installed' && error !== 'not_metamask' && (
+              <Alert severity="error" sx={{ mb: 3 }}>
+                {error}
+              </Alert>
+            )}
 
-            <Typography variant="body2" color="text.secondary" textAlign="center">
-              By connecting your wallet, you agree to our{' '}
+            <Stack spacing={3}>
+              <Button
+                variant="contained"
+                size="large"
+                fullWidth
+                startIcon={<WalletIcon />}
+                onClick={handleConnect}
+                disabled={isConnecting}
+                sx={{
+                  py: 1.5,
+                  borderRadius: 2,
+                  textTransform: 'none',
+                  fontSize: '1rem',
+                  fontWeight: 600,
+                }}
+              >
+                {isConnecting ? 'Connecting...' : 'Connect with MetaMask'}
+              </Button>
+
+              <Typography variant="body2" color="text.secondary" textAlign="center">
+                By connecting your wallet, you agree to our{' '}
+                <Typography
+                  component="span"
+                  variant="body2"
+                  color="primary"
+                  sx={{ cursor: 'pointer', fontWeight: 500 }}
+                  onClick={() => navigate('/terms')}
+                >
+                  Terms of Service
+                </Typography>{' '}
+                and{' '}
+                <Typography
+                  component="span"
+                  variant="body2"
+                  color="primary"
+                  sx={{ cursor: 'pointer', fontWeight: 500 }}
+                  onClick={() => navigate('/privacy')}
+                >
+                  Privacy Policy
+                </Typography>
+              </Typography>
+            </Stack>
+          </Paper>
+        )}
+
+        {!isMetaMaskNotInstalled && !isNotMetaMask && (
+          <Box mt={4} textAlign="center">
+            <Typography variant="body2" color="white">
+              Don't have a wallet?{' '}
               <Typography
                 component="span"
                 variant="body2"
-                color="primary"
+                color="secondary"
                 sx={{ cursor: 'pointer', fontWeight: 500 }}
-                onClick={() => navigate('/terms')}
+                onClick={() => window.open('https://chromewebstore.google.com/detail/metamask/nkbihfbeogaeaoehlefnkodbefgpgknn', '_blank')}
               >
-                Terms of Service
-              </Typography>{' '}
-              and{' '}
-              <Typography
-                component="span"
-                variant="body2"
-                color="primary"
-                sx={{ cursor: 'pointer', fontWeight: 500 }}
-                onClick={() => navigate('/privacy')}
-              >
-                Privacy Policy
+                Get MetaMask
               </Typography>
             </Typography>
-          </Stack>
-        </Paper>
-
-        <Box mt={4} textAlign="center">
-          <Typography variant="body2" color="white">
-            Don't have a wallet?{' '}
-            <Typography
-              component="span"
-              variant="body2"
-              color="secondary"
-              sx={{ cursor: 'pointer', fontWeight: 500 }}
-              onClick={() => window.open('https://metamask.io/download/', '_blank')}
-            >
-              Get MetaMask
-            </Typography>
-          </Typography>
-        </Box>
+          </Box>
+        )}
       </Container>
     </Box>
   );

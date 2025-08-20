@@ -449,18 +449,49 @@ If the backend can't connect to IPFS, check the `IPFS_API_URL` in the `.env` fil
 
 For more information or support, please contact the ContriBlock team.
 
+## Running the Application
 
+### Frontend
 
-
-
-to run the frontend 
-
+```bash
 cd frontend; npm run dev
+```
 
-to run the backend
+### Backend
 
-//cd backend; uvicorn main:app --host 0.0.0.0 --port 8000
-docker-compose up -d backend postgres redis ipfs blockchain 
-cd backend && python -m pip install -r requirements.txt 
-cd backend; python -m pip install -r requirements.txt 
-cd backend; python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload 
+```bash
+# Option 1: Using Docker
+docker-compose up -d backend postgres redis ipfs blockchain
+
+# Option 2: Running locally
+cd backend; python -m pip install -r requirements.txt
+cd backend; python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+```
+
+## Environment Variables
+
+The backend requires the following environment variables to be set in a `.env` file in the `backend` directory:
+
+### Security Settings
+- `JWT_SECRET`: Secret key for JWT token generation
+- `JWT_ALGORITHM`: Algorithm used for JWT (default: HS256)
+- `JWT_ACCESS_TOKEN_EXPIRE_MINUTES`: Token expiration time in minutes (default: 10080, which is 7 days)
+
+### Database Settings
+- `DATABASE_URL`: PostgreSQL connection string (e.g., postgresql://postgres:postgres@localhost:5432/cotriblock)
+
+### Redis Settings
+- `REDIS_URL`: Redis connection string (e.g., redis://localhost:6379/0)
+
+### Web3 Settings
+- `WEB3_RPC_URL`: URL of the Ethereum RPC endpoint (e.g., http://localhost:8545)
+- `CHAIN_ID`: Ethereum chain ID (e.g., 1337 for local development)
+- `ADMIN_PRIVATE_KEY`: Private key for the admin account (without '0x' prefix)
+- `TOKEN_ADDRESS`: Address of the deployed ContriToken contract (optional)
+- `CONTROLLER_ADDRESS`: Address of the deployed Controller contract (optional)
+
+### IPFS Settings
+- `IPFS_API_URL`: URL of the IPFS API endpoint (e.g., http://localhost:5001)
+
+### CORS Settings
+- `CORS_ORIGINS`: Comma-separated list of allowed origins for CORS (e.g., http://localhost:5173,http://localhost:3000)

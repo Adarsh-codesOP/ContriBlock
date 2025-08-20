@@ -86,134 +86,76 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setState(prev => ({ ...prev, isLoading: true, error: null }));
       
       // Check if MetaMask is installed
-      console.log('Checking for MetaMask:', window.ethereum);
       if (!window.ethereum) {
-        console.error('MetaMask not detected: window.ethereum is undefined');
-        
-        // Always use demo mode for testing purposes
-        console.log('Using demo mode for testing');
-        // Use a demo wallet address for testing
-        const demoAddress = '0x0000000000000000000000000000000000000000';
-        
-        // Mock user data for demo mode
-        const demoUser = {
-          id: 999,
-          wallet: demoAddress,
-          name: 'Demo User',
-          email: 'demo@example.com',
-          role: 'ADMIN' as UserRole, // Give admin role for full access
-          kycStatus: 'APPROVED' as KycStatus,
-          reputation: 100,
-          createdAt: new Date().toISOString()
-        };
-        
-        // Update state with demo user
-        setState({
-          user: demoUser,
-          isAuthenticated: true,
+        setState(prev => ({
+          ...prev,
           isLoading: false,
-          error: null,
-        });
-        
-        // Store a demo token
-        localStorage.setItem('accessToken', 'demo_token');
-        
-        return; // Exit the function early
+          error: 'metamask_not_installed'
+        }));
+        return;
       }
       
       // Check if it's actually MetaMask
       if (!window.ethereum.isMetaMask) {
-        console.warn('Ethereum provider detected but may not be MetaMask');
-        // Use demo mode for non-MetaMask providers too
-        const demoAddress = window.ethereum.selectedAddress || '0x0000000000000000000000000000000000000000';
-        
-        // Mock user data for demo mode
-        const demoUser = {
-          id: 999,
-          wallet: demoAddress,
-          name: 'Demo User',
-          email: 'demo@example.com',
-          role: 'ADMIN' as UserRole, // Give admin role for full access
-          kycStatus: 'APPROVED' as KycStatus,
-          reputation: 100,
-          createdAt: new Date().toISOString()
-        };
-        
-        // Update state with demo user
-        setState({
-          user: demoUser,
-          isAuthenticated: true,
+        setState(prev => ({
+          ...prev,
           isLoading: false,
-          error: null,
-        });
-        
-        // Store a demo token
-        localStorage.setItem('accessToken', 'demo_token');
-        
-        return; // Exit the function early
+          error: 'not_metamask'
+        }));
+        return;
       }
 
-      // Use demo mode for all cases to bypass backend issues
-      console.log('Using demo mode with MetaMask address');
+      // Get the user's Ethereum address
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const accounts = await provider.send('eth_requestAccounts', []);
+      const address = accounts[0];
       
-      try {
-        // Try to get the address from MetaMask if available
-        const provider = new ethers.providers.Web3Provider(window.ethereum);
-        const accounts = await provider.send('eth_requestAccounts', []);
-        const address = accounts[0];
-        
-        // Create a demo user with the actual MetaMask address
-        const demoUser = {
-          id: 999,
-          wallet: address,
-          name: 'Demo User',
-          email: 'demo@example.com',
-          role: 'ADMIN' as UserRole, // Give admin role for full access
-          kycStatus: 'APPROVED' as KycStatus,
-          reputation: 100,
-          createdAt: new Date().toISOString()
-        };
-        
-        // Update state with demo user
-        setState({
-          user: demoUser,
-          isAuthenticated: true,
-          isLoading: false,
-          error: null,
-        });
-        
-        // Store a demo token
-        localStorage.setItem('accessToken', 'demo_token_' + address);
-      } catch (error) {
-        console.error('Error getting MetaMask address:', error);
-        // Fallback to a generic demo address
-        const demoAddress = '0x0000000000000000000000000000000000000000';
-        
-        // Create a demo user with the generic address
-        const demoUser = {
-          id: 999,
-          wallet: demoAddress,
-          name: 'Demo User',
-          email: 'demo@example.com',
-          role: 'ADMIN' as UserRole, // Give admin role for full access
-          kycStatus: 'APPROVED' as KycStatus,
-          reputation: 100,
-          createdAt: new Date().toISOString()
-        };
-        
-        // Update state with demo user
-        setState({
-          user: demoUser,
-          isAuthenticated: true,
-          isLoading: false,
-          error: null,
-        });
-        
-        // Store a demo token
-        localStorage.setItem('accessToken', 'demo_token');
+      if (!address) {
+        throw new Error('No Ethereum address found. Please check your MetaMask connection.');
       }
       
+      // Get a nonce from the server for this wallet address
+      const { nonce } = await authApi.getNonce(address);
+      
+      // Create a SIWE message for the user to sign
+      const domain = window.location.host;
+      const origin = window.location.origin;
+      const statement = 'Sign in with Ethereum to ContriBlock';
+      
+      const message = new SiweMessage({
+        domain,
+        address,
+        statement,
+        uri: origin,
+        version: '1',
+        chainId: parseInt(window.ethereum.chainId || '1', 16),
+        nonce
+      });
+      
+      const messageToSign = message.prepareMessage();
+      
+      // Request signature from the user
+      const signature = await provider.getSigner().signMessage(messageToSign);
+      
+      // Verify the signature with the backend
+      const authResult = await authApi.verifySignature({
+        wallet: address,
+        message: messageToSign,
+        signature
+      });
+      
+      // Store the token and update state
+      localStorage.setItem('accessToken', authResult.access_token);
+      
+      // Update state with authenticated user
+      setState({
+        user: authResult,
+        isAuthenticated: true,
+        isLoading: false,
+        error: null,
+      });
     } catch (error) {
+      console.error('Login error:', error);
       const apiError = error as ApiError;
       setState(prev => ({
         ...prev,

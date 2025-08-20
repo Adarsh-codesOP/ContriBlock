@@ -1,48 +1,56 @@
-import { useEffect, useState } from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
+import { useEffect, useState, lazy, Suspense } from "react";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { Box, CircularProgress, CssBaseline } from "@mui/material";
 
 import { useAuth } from "./contexts/AuthContext";
 import Layout from "./components/layout/Layout";
+// Import HomePage normally as it's the landing page
 import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
-import DashboardPage from "./pages/DashboardPage";
-import ContributionsPage from "./pages/ContributionsPage";
-import ContributionDetailPage from "./pages/ContributionDetailPage";
-import NewContributionPage from "./pages/NewContributionPage";
-import ImpactPage from "./pages/ImpactPage";
-import ImpactDetailPage from "./pages/ImpactDetailPage"; // ✅ now valid
-import NewImpactPage from "./pages/NewImpactPage";
-import VerificationPage from "./pages/VerificationPage";
-import MarketplacePage from "./pages/MarketplacePage";
-import MarketplaceItemPage from "./pages/MarketplaceItemPage";
-import NewMarketplaceItemPage from "./pages/NewMarketplaceItemPage";
-import PurchaseHistoryPage from "./pages/PurchaseHistoryPage";
-import ProfilePage from "./pages/ProfilePage";
-import AdminPage from "./pages/AdminPage";
-import NotFoundPage from "./pages/NotFoundPage";
+// Lazy load all other pages
+const DashboardPage = lazy(() => import("./pages/DashboardPage"));
+const ContributionsPage = lazy(() => import("./pages/ContributionsPage"));
+const ContributionDetailPage = lazy(() => import("./pages/ContributionDetailPage"));
+const NewContributionPage = lazy(() => import("./pages/NewContributionPage"));
+const ImpactPage = lazy(() => import("./pages/ImpactPage"));
+const ImpactDetailPage = lazy(() => import("./pages/ImpactDetailPage"));
+const NewImpactPage = lazy(() => import("./pages/NewImpactPage"));
+const VerificationPage = lazy(() => import("./pages/VerificationPage"));
+const MarketplacePage = lazy(() => import("./pages/MarketplacePage"));
+const MarketplaceItemPage = lazy(() => import("./pages/MarketplaceItemPage"));
+const NewMarketplaceItemPage = lazy(() => import("./pages/NewMarketplaceItemPage"));
+const PurchaseHistoryPage = lazy(() => import("./pages/PurchaseHistoryPage"));
+const ProfilePage = lazy(() => import("./pages/ProfilePage"));
+const AdminPage = lazy(() => import("./pages/AdminPage"));
+const NotFoundPage = lazy(() => import("./pages/NotFoundPage"));
+
+// Loading component for Suspense fallback
+const LoadingComponent = () => (
+  <Box
+    sx={{
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      height: "100vh",
+    }}
+  >
+    <CircularProgress />
+  </Box>
+);
 
 // Protected route component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, user } = useAuth();
+  const location = useLocation();
 
   if (isLoading) {
-    return (
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          height: "100vh",
-        }}
-      >
-        <CircularProgress />
-      </Box>
-    );
+    return <LoadingComponent />;
   }
 
-  if (!isAuthenticated) {
-    return <Navigate to="/login" />;
+  // Check both isAuthenticated flag and user existence
+  if (!isAuthenticated || !user) {
+    // Save the current location to redirect back after login
+    return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
   return <>{children}</>;
@@ -59,18 +67,7 @@ const RoleRoute = ({
   const { user, isLoading } = useAuth();
 
   if (isLoading) {
-    return (
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          height: "100vh",
-        }}
-      >
-        <CircularProgress />
-      </Box>
-    );
+    return <LoadingComponent />;
   }
 
   if (!user || !allowedRoles.includes(user.role)) {
@@ -94,18 +91,7 @@ function App() {
   }, []);
 
   if (!appReady || isLoading) {
-    return (
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          height: "100vh",
-        }}
-      >
-        <CircularProgress />
-      </Box>
-    );
+    return <LoadingComponent />;
   }
 
   return (
@@ -126,7 +112,9 @@ function App() {
           element={
             <ProtectedRoute>
               <Layout>
-                <DashboardPage />
+                <Suspense fallback={<LoadingComponent />}>
+                  <DashboardPage />
+                </Suspense>
               </Layout>
             </ProtectedRoute>
           }
@@ -137,7 +125,9 @@ function App() {
           element={
             <ProtectedRoute>
               <Layout>
-                <ContributionsPage />
+                <Suspense fallback={<LoadingComponent />}>
+                  <ContributionsPage />
+                </Suspense>
               </Layout>
             </ProtectedRoute>
           }
@@ -148,7 +138,9 @@ function App() {
           element={
             <ProtectedRoute>
               <Layout>
-                <NewContributionPage />
+                <Suspense fallback={<LoadingComponent />}>
+                  <NewContributionPage />
+                </Suspense>
               </Layout>
             </ProtectedRoute>
           }
@@ -159,7 +151,9 @@ function App() {
           element={
             <ProtectedRoute>
               <Layout>
-                <ContributionDetailPage />
+                <Suspense fallback={<LoadingComponent />}>
+                  <ContributionDetailPage />
+                </Suspense>
               </Layout>
             </ProtectedRoute>
           }
@@ -170,7 +164,9 @@ function App() {
           element={
             <ProtectedRoute>
               <Layout>
-                <ImpactPage />
+                <Suspense fallback={<LoadingComponent />}>
+                  <ImpactPage />
+                </Suspense>
               </Layout>
             </ProtectedRoute>
           }
@@ -181,7 +177,9 @@ function App() {
           element={
             <ProtectedRoute>
               <Layout>
-                <NewImpactPage />
+                <Suspense fallback={<LoadingComponent />}>
+                  <NewImpactPage />
+                </Suspense>
               </Layout>
             </ProtectedRoute>
           }
@@ -192,7 +190,9 @@ function App() {
           element={
             <ProtectedRoute>
               <Layout>
-                <ImpactDetailPage />
+                <Suspense fallback={<LoadingComponent />}>
+                  <ImpactDetailPage />
+                </Suspense>
               </Layout>
             </ProtectedRoute>
           }
@@ -204,7 +204,9 @@ function App() {
             <ProtectedRoute>
               <RoleRoute allowedRoles={["VERIFIER", "ADMIN"]}>
                 <Layout>
-                  <VerificationPage />
+                  <Suspense fallback={<LoadingComponent />}>
+                    <VerificationPage />
+                  </Suspense>
                 </Layout>
               </RoleRoute>
             </ProtectedRoute>
@@ -216,7 +218,9 @@ function App() {
           element={
             <ProtectedRoute>
               <Layout>
-                <MarketplacePage />
+                <Suspense fallback={<LoadingComponent />}>
+                  <MarketplacePage />
+                </Suspense>
               </Layout>
             </ProtectedRoute>
           }
@@ -228,7 +232,9 @@ function App() {
             <ProtectedRoute>
               <RoleRoute allowedRoles={["ADMIN"]}>
                 <Layout>
-                  <NewMarketplaceItemPage />
+                  <Suspense fallback={<LoadingComponent />}>
+                    <NewMarketplaceItemPage />
+                  </Suspense>
                 </Layout>
               </RoleRoute>
             </ProtectedRoute>
@@ -240,7 +246,9 @@ function App() {
           element={
             <ProtectedRoute>
               <Layout>
-                <PurchaseHistoryPage />
+                <Suspense fallback={<LoadingComponent />}>
+                  <PurchaseHistoryPage />
+                </Suspense>
               </Layout>
             </ProtectedRoute>
           }
@@ -251,7 +259,9 @@ function App() {
           element={
             <ProtectedRoute>
               <Layout>
-                <MarketplaceItemPage />
+                <Suspense fallback={<LoadingComponent />}>
+                  <MarketplaceItemPage />
+                </Suspense>
               </Layout>
             </ProtectedRoute>
           }
@@ -262,7 +272,9 @@ function App() {
           element={
             <ProtectedRoute>
               <Layout>
-                <ProfilePage />
+                <Suspense fallback={<LoadingComponent />}>
+                  <ProfilePage />
+                </Suspense>
               </Layout>
             </ProtectedRoute>
           }
@@ -274,14 +286,23 @@ function App() {
             <ProtectedRoute>
               <RoleRoute allowedRoles={["ADMIN"]}>
                 <Layout>
-                  <AdminPage />
+                  <Suspense fallback={<LoadingComponent />}>
+                    <AdminPage />
+                  </Suspense>
                 </Layout>
               </RoleRoute>
             </ProtectedRoute>
           }
         />
 
-        <Route path="*" element={<NotFoundPage />} />
+        <Route
+          path="*"
+          element={
+            <Suspense fallback={<LoadingComponent />}>
+              <NotFoundPage />
+            </Suspense>
+          }
+        />
       </Routes>
     </>
   );
