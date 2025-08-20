@@ -16,9 +16,11 @@ contract ContriToken is ERC20, Ownable {
     event Burned(address indexed from, uint256 amount);
 
     /**
-     * @dev Constructor that gives the msg.sender all of existing tokens.
+     * @dev Constructor sets token name/symbol and assigns initial ownership.
      */
-    constructor(address initialOwner) ERC20("ContriToken", "CTR") Ownable(initialOwner) {}
+    constructor(address initialOwner) ERC20("ContriToken", "CTR") {
+        _transferOwnership(initialOwner); // ✅ sets owner correctly
+    }
 
     /**
      * @dev Set the controller address

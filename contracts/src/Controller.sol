@@ -37,10 +37,14 @@ contract Controller is Ownable {
     /**
      * @dev Constructor
      * @param _token The address of the ContriToken contract
+     * @param initialOwner The address of the initial owner
      */
-    constructor(address _token, address initialOwner) Ownable(initialOwner) {
+    constructor(address _token, address initialOwner) {
         require(_token != address(0), "Token cannot be zero address");
+        require(initialOwner != address(0), "Owner cannot be zero address");
+
         token = ContriToken(_token);
+        _transferOwnership(initialOwner); // ✅ OpenZeppelin v5 way
     }
 
     /**
