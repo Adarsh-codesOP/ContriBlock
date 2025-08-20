@@ -3,6 +3,7 @@ pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+// Using OpenZeppelin v4.9.3 as specified in package.json
 
 /**
  * @title ContriToken
@@ -19,7 +20,8 @@ contract ContriToken is ERC20, Ownable {
      * @dev Constructor sets token name/symbol and assigns initial ownership.
      */
     constructor(address initialOwner) ERC20("ContriToken", "CTR") {
-        _transferOwnership(initialOwner); // ✅ sets owner correctly
+        // Transfer ownership to initialOwner
+        _transferOwnership(initialOwner);
     }
 
     /**

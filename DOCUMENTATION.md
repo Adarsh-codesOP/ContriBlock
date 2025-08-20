@@ -464,3 +464,4 @@ docker-compose up -d backend postgres redis ipfs blockchain
 cd backend && python -m pip install -r requirements.txt 
 cd backend; python -m pip install -r requirements.txt 
 cd backend; python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload 
+
