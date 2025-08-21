@@ -26,135 +26,127 @@ if not private_key:
 account = w3.eth.account.from_key(private_key)
 print(f"Deploying from account: {account.address}")
 
-# Load contract ABIs and bytecode
-def load_contract(contract_name):
-    # Try different possible paths for artifacts
+# Helpers
+CHAIN_ID = w3.eth.chain_id  # e.g. 31337 on Hardhat
+
+def next_nonce():
+    return w3.eth.get_transaction_count(account.address)
+
+def load_contract(contract_name: str):
     possible_paths = [
         Path("../artifacts/src"),
         Path("../artifacts/contracts"),
         Path("./artifacts/src"),
         Path("./artifacts/contracts"),
         Path("/app/artifacts/src"),
-        Path("/app/artifacts/contracts")
+        Path("/app/artifacts/contracts"),
     ]
-    
     for artifacts_dir in possible_paths:
         try:
             file_path = artifacts_dir / f"{contract_name}.sol" / f"{contract_name}.json"
             print(f"Trying path: {file_path}")
             with open(file_path) as f:
                 contract_json = json.load(f)
-            return contract_json["abi"], contract_json["bytecode"]
+            # Hardhat artifact format: "abi" and "bytecode" (hex string)
+            abi = contract_json["abi"]
+            bytecode = contract_json["bytecode"]
+            if not bytecode or bytecode == "0x":
+                raise ValueError(f"Empty bytecode for {contract_name}")
+            return abi, bytecode
         except FileNotFoundError:
             continue
-    
-    # If we get here, we couldn't find the file
+
     print(f"Could not find contract artifacts for {contract_name}")
-    # List available files in artifacts directory
     print("Available directories:")
     for path in [Path("."), Path("../artifacts"), Path("/app/artifacts")]:
         if path.exists():
             print(f"Contents of {path}:")
             for item in path.glob("**/*"):
                 print(f"  {item}")
-    
     raise FileNotFoundError(f"Could not find contract artifacts for {contract_name}")
 
 # Deploy ContriToken
 def deploy_token():
     abi, bytecode = load_contract("ContriToken")
     ContriToken = w3.eth.contract(abi=abi, bytecode=bytecode)
-    
-    # Estimate gas
-    gas_estimate = ContriToken.constructor(account.address).estimate_gas()
-    
-    # Build transaction
-    transaction = ContriToken.constructor(account.address).build_transaction({
+
+    # Estimate gas (constructor needs a from address)
+    gas_estimate = ContriToken.constructor(account.address).estimate_gas({"from": account.address})
+
+    tx = ContriToken.constructor(account.address).build_transaction({
         "from": account.address,
-        "nonce": w3.eth.get_transaction_count(account.address),
+        "nonce": next_nonce(),
         "gas": gas_estimate,
+        # Using legacy gasPrice is fine on Hardhat; EIP-1559 fields would also work
         "gasPrice": w3.eth.gas_price,
+        "chainId": CHAIN_ID,
     })
-    
-    # Sign and send transaction
-    signed_txn = w3.eth.account.sign_transaction(transaction, private_key=private_key)
-    tx_hash = w3.eth.send_raw_transaction(signed_txn.rawTransaction)
-    
-    # Wait for transaction receipt
-    tx_receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
-    token_address = tx_receipt.contractAddress
-    
-    print(f"ContriToken deployed at: {token_address}")
-    return token_address
+
+    signed = w3.eth.account.sign_transaction(tx, private_key=private_key)
+    tx_hash = w3.eth.send_raw_transaction(signed.raw_transaction)  # <-- v6 snake_case
+    receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
+    addr = receipt.contractAddress
+    print(f"ContriToken deployed at: {addr}")
+    return addr
 
 # Deploy Controller
-def deploy_controller(token_address):
+def deploy_controller(token_address: str):
     abi, bytecode = load_contract("Controller")
     Controller = w3.eth.contract(abi=abi, bytecode=bytecode)
-    
-    # Estimate gas
-    gas_estimate = Controller.constructor(token_address, account.address).estimate_gas()
-    
-    # Build transaction
-    transaction = Controller.constructor(token_address, account.address).build_transaction({
+
+    gas_estimate = Controller.constructor(token_address, account.address).estimate_gas({"from": account.address})
+
+    tx = Controller.constructor(token_address, account.address).build_transaction({
         "from": account.address,
-        "nonce": w3.eth.get_transaction_count(account.address),
+        "nonce": next_nonce(),
         "gas": gas_estimate,
         "gasPrice": w3.eth.gas_price,
+        "chainId": CHAIN_ID,
     })
-    
-    # Sign and send transaction
-    signed_txn = w3.eth.account.sign_transaction(transaction, private_key=private_key)
-    tx_hash = w3.eth.send_raw_transaction(signed_txn.rawTransaction)
-    
-    # Wait for transaction receipt
-    tx_receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
-    controller_address = tx_receipt.contractAddress
-    
-    print(f"Controller deployed at: {controller_address}")
-    return controller_address
+
+    signed = w3.eth.account.sign_transaction(tx, private_key=private_key)
+    tx_hash = w3.eth.send_raw_transaction(signed.raw_transaction)  # <-- v6 snake_case
+    receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
+    addr = receipt.contractAddress
+    print(f"Controller deployed at: {addr}")
+    return addr
 
 # Set controller in token contract
-def set_controller(token_address, controller_address):
+def set_controller(token_address: str, controller_address: str):
     abi, _ = load_contract("ContriToken")
     token = w3.eth.contract(address=token_address, abi=abi)
-    
-    # Build transaction
-    transaction = token.functions.setController(controller_address).build_transaction({
-        "from": account.address,
-        "nonce": w3.eth.get_transaction_count(account.address),
-        "gas": 100000,  # Estimate
-        "gasPrice": w3.eth.gas_price,
-    })
-    
-    # Sign and send transaction
-    signed_txn = w3.eth.account.sign_transaction(transaction, private_key=private_key)
-    tx_hash = w3.eth.send_raw_transaction(signed_txn.rawTransaction)
-    
-    # Wait for transaction receipt
-    tx_receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
-    print(f"Controller set in token contract: {tx_receipt.status}")
 
-# Main deployment function
+    gas_estimate = token.functions.setController(controller_address).estimate_gas({"from": account.address})
+
+    tx = token.functions.setController(controller_address).build_transaction({
+        "from": account.address,
+        "nonce": next_nonce(),
+        "gas": gas_estimate,
+        "gasPrice": w3.eth.gas_price,
+        "chainId": CHAIN_ID,
+    })
+
+    signed = w3.eth.account.sign_transaction(tx, private_key=private_key)
+    tx_hash = w3.eth.send_raw_transaction(signed.raw_transaction)
+    receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
+    print(f"Controller set in token contract: {receipt.status}")
+
 def main():
     print("Deploying ContriBlock contracts...")
-    
-    # Deploy token
     token_address = deploy_token()
-    
-    # Deploy controller
     controller_address = deploy_controller(token_address)
-    
-    # Set controller in token
     set_controller(token_address, controller_address)
-    
-    # Save addresses to file
+
     with open("../deployed_addresses.json", "w") as f:
-        json.dump({
-            "token_address": token_address,
-            "controller_address": controller_address,
-        }, f, indent=2)
-    
+        json.dump(
+            {
+                "token_address": token_address,
+                "controller_address": controller_address,
+            },
+            f,
+            indent=2,
+        )
+
     print("Deployment complete!")
     print(f"TOKEN_ADDRESS={token_address}")
     print(f"CONTROLLER_ADDRESS={controller_address}")

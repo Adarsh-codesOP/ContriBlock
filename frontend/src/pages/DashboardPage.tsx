@@ -56,15 +56,17 @@ const DashboardPage = () => {
         // Fetch user's contributions
         const contributionsResponse = await api.contributions.getUserContributions();
         console.log('Contributions response:', contributionsResponse);
-        setContributions(contributionsResponse.slice(0, 5)); // Get latest 5
+        const contributionsData = Array.isArray(contributionsResponse) ? contributionsResponse : [];
+        setContributions(contributionsData.slice(0, 5)); // Get latest 5
         
         // Fetch user's impact records
         const impactsResponse = await api.impact.getUserImpact();
         console.log('Impacts response:', impactsResponse);
-        setImpacts(impactsResponse.slice(0, 5)); // Get latest 5
+        const impactsData = Array.isArray(impactsResponse) ? impactsResponse : [];
+        setImpacts(impactsData.slice(0, 5)); // Get latest 5
         
         // Calculate stats
-        const allContributions = contributionsResponse;
+        const allContributions = contributionsData;
         const verifiedCount = allContributions.filter(
           (c: Contribution) => c.status === ContributionStatus.APPROVED
         ).length;
@@ -73,7 +75,7 @@ const DashboardPage = () => {
         ).length;
         
         // Calculate total impact (this would depend on your impact metrics)
-        const totalImpactValue = impactsResponse.reduce(
+        const totalImpactValue = impactsData.reduce(
           (sum: number, impact: Impact) => sum + (impact.value || 0),
           0
         );
@@ -88,6 +90,9 @@ const DashboardPage = () => {
         });
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
+        // Set empty arrays to prevent undefined errors
+        setContributions([]);
+        setImpacts([]);
       } finally {
         setIsLoading(false);
       }

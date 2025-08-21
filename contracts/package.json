@@ -3,13 +3,15 @@
   "version": "1.0.0",
   "description": "Smart contracts for ContriBlock platform",
   "main": "index.js",
+  "type": "commonjs",
   "scripts": {
     "compile": "hardhat compile",
     "test": "hardhat test",
     "deploy": "python3 script/deploy.py"
   },
   "dependencies": {
-    "@openzeppelin/contracts": "^4.9.3"
+    "@openzeppelin/contracts": "^4.9.3",
+    "dotenv": "^16.3.1"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^3.0.0",

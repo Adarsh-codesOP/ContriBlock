@@ -3,6 +3,7 @@ pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./ContriToken.sol";
+// Using OpenZeppelin v4.9.3 as specified in package.json
 
 /**
  * @title Controller
@@ -37,10 +38,15 @@ contract Controller is Ownable {
     /**
      * @dev Constructor
      * @param _token The address of the ContriToken contract
+     * @param initialOwner The address of the initial owner
      */
-    constructor(address _token, address initialOwner) Ownable(initialOwner) {
+    constructor(address _token, address initialOwner) {
         require(_token != address(0), "Token cannot be zero address");
+        require(initialOwner != address(0), "Owner cannot be zero address");
+
         token = ContriToken(_token);
+        // Transfer ownership to initialOwner
+        _transferOwnership(initialOwner);
     }
 
     /**
@@ -114,28 +120,37 @@ contract Controller is Ownable {
         uint256[] calldata _scores,
         uint256 _poolAmount
     ) external onlyOwner {
-        require(_ids.length == _scores.length, "Arrays must have same length");
-        require(_ids.length > 0, "Arrays cannot be empty");
+        uint256 idsLength = _ids.length;
+        require(idsLength == _scores.length, "Arrays must have same length");
+        require(idsLength > 0, "Arrays cannot be empty");
         require(_poolAmount > 0, "Pool amount must be greater than zero");
 
+        // Calculate total score in a single pass
         uint256 totalScore = 0;
-        for (uint256 i = 0; i < _scores.length; i++) {
+        for (uint256 i = 0; i < idsLength; i++) {
             totalScore += _scores[i];
         }
-
         require(totalScore > 0, "Total score must be greater than zero");
 
-        for (uint256 i = 0; i < _ids.length; i++) {
+        // Cache token contract to save gas
+        ContriToken tokenContract = token;
+        
+        // Process distributions
+        for (uint256 i = 0; i < idsLength; i++) {
             uint256 id = _ids[i];
             uint256 score = _scores[i];
             Contribution storage contribution = contributions[id];
 
-            require(contribution.author != address(0), "Contribution does not exist");
-            require(contribution.approved, "Contribution not approved");
+            // Group validations to reduce gas
+            require(
+                contribution.author != address(0) && contribution.approved,
+                "Contribution invalid or not approved"
+            );
 
+            // Only mint if amount > 0
             uint256 amount = (_poolAmount * score) / totalScore;
             if (amount > 0) {
-                token.mint(contribution.author, amount);
+                tokenContract.mint(contribution.author, amount);
             }
         }
 

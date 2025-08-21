@@ -79,10 +79,15 @@ const VerificationPage = () => {
     setIsLoading(true);
     try {
       const response = await api.verification.getPendingContributions();
-      setPendingContributions(response.data);
+      if (response && response.data) {
+        setPendingContributions(response.data);
+      } else {
+        setPendingContributions([]);
+      }
     } catch (err) {
       console.error('Error fetching pending contributions:', err);
       setError('Failed to load pending contributions. Please try again.');
+      setPendingContributions([]);
     } finally {
       setIsLoading(false);
     }
